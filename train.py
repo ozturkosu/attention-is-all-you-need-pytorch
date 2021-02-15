@@ -154,7 +154,7 @@ def train(model, training_data, validation_data, optimizer, device, opt):
 
     def print_performances(header, ppl, accu, start_time, lr, Num_parameters):
         print('  - {header:12} ppl: {ppl: 8.5f}, accuracy: {accu:3.3f} %, lr: {lr:8.5f}, '\
-              'elapse: {elapse:3.3f} min ParameterNumber: {Num_parameters: 8.5f}'.format(
+              'elapse: {elapse:3.3f} min, ParameterNumber: {Num_parameters: 8.2f}'.format(
                   header=f"({header})", ppl=ppl,
                   accu=100*accu, elapse=(time.time()-start_time)/60, lr=lr, Num_parameters=Num_parameters))
 
@@ -166,10 +166,13 @@ def train(model, training_data, validation_data, optimizer, device, opt):
         start = time.time()
         train_loss, train_accu = train_epoch(
             model, training_data, optimizer, opt, device, smoothing=opt.label_smoothing)
+            
         train_ppl = math.exp(min(train_loss, 100))
+
         # Current learning rate
         lr = optimizer._optimizer.param_groups[0]['lr']
 
+        #Calculate Num op parameters of model 
         Num_parameters = count_parameters(model)
         print_performances('Training', train_ppl, train_accu, start, lr, Num_parameters)
 
@@ -177,6 +180,7 @@ def train(model, training_data, validation_data, optimizer, device, opt):
         valid_loss, valid_accu = eval_epoch(model, validation_data, device, opt)
         valid_ppl = math.exp(min(valid_loss, 100))
 
+        #Calculate Num op parameters of model
         Num_parameters = count_parameters(model)
         print_performances('Validation', valid_ppl, valid_accu, start, lr, Num_parameters)
 
