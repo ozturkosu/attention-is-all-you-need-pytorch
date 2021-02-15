@@ -5,8 +5,6 @@ import numpy as np
 from transformer.Layers import EncoderLayer, DecoderLayer
 
 
-__author__ = "Yu-Hsiang Huang"
-
 
 def get_pad_mask(seq, pad_idx):
     return (seq != pad_idx).unsqueeze(-2)
@@ -150,6 +148,7 @@ class Transformer(nn.Module):
         #   'none': no multiplication
 
         assert scale_emb_or_prj in ['emb', 'prj', 'none']
+        
         scale_emb = (scale_emb_or_prj == 'emb') if trg_emb_prj_weight_sharing else False
         self.scale_prj = (scale_emb_or_prj == 'prj') if trg_emb_prj_weight_sharing else False
         self.d_model = d_model

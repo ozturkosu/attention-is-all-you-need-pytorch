@@ -69,6 +69,9 @@ def patch_trg(trg, pad_idx):
     return trg, gold
 
 
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
 def train_epoch(model, training_data, optimizer, opt, device, smoothing):
     ''' Epoch operation in training phase'''
 
@@ -149,11 +152,11 @@ def train(model, training_data, validation_data, optimizer, device, opt):
         log_tf.write('epoch,loss,ppl,accuracy\n')
         log_vf.write('epoch,loss,ppl,accuracy\n')
 
-    def print_performances(header, ppl, accu, start_time, lr):
+    def print_performances(header, ppl, accu, start_time, lr, Num_parameters):
         print('  - {header:12} ppl: {ppl: 8.5f}, accuracy: {accu:3.3f} %, lr: {lr:8.5f}, '\
-              'elapse: {elapse:3.3f} min'.format(
+              'elapse: {elapse:3.3f} min ParameterNumber: {Num_parameters: 8.5f}'.format(
                   header=f"({header})", ppl=ppl,
-                  accu=100*accu, elapse=(time.time()-start_time)/60, lr=lr))
+                  accu=100*accu, elapse=(time.time()-start_time)/60, lr=lr, Num_parameters=Num_parameters))
 
     #valid_accus = []
     valid_losses = []
@@ -166,12 +169,16 @@ def train(model, training_data, validation_data, optimizer, device, opt):
         train_ppl = math.exp(min(train_loss, 100))
         # Current learning rate
         lr = optimizer._optimizer.param_groups[0]['lr']
-        print_performances('Training', train_ppl, train_accu, start, lr)
+
+        Num_parameters = count_parameters(model)
+        print_performances('Training', train_ppl, train_accu, start, lr, Num_parameters)
 
         start = time.time()
         valid_loss, valid_accu = eval_epoch(model, validation_data, device, opt)
         valid_ppl = math.exp(min(valid_loss, 100))
-        print_performances('Validation', valid_ppl, valid_accu, start, lr)
+
+        Num_parameters = count_parameters(model)
+        print_performances('Validation', valid_ppl, valid_accu, start, lr, Num_parameters)
 
         valid_losses += [valid_loss]
 
@@ -199,8 +206,7 @@ def train(model, training_data, validation_data, optimizer, device, opt):
             tb_writer.add_scalars('accuracy', {'train': train_accu*100, 'val': valid_accu*100}, epoch_i)
             tb_writer.add_scalar('learning_rate', lr, epoch_i)
 
-def count_parameters(model):
-    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
 
 
 

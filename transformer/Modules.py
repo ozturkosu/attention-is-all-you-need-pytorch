@@ -8,7 +8,7 @@ class ScaledDotProductAttention(nn.Module):
     ''' Scaled Dot-Product Attention '''
 
     #Temperature is d 
-    
+
     def __init__(self, temperature, attn_dropout=0.1):
         super().__init__()
         self.temperature = temperature
@@ -21,6 +21,8 @@ class ScaledDotProductAttention(nn.Module):
         if mask is not None:
             attn = attn.masked_fill(mask == 0, -1e9)
 
+        # attn here is attention matrix
+        
         attn = self.dropout(F.softmax(attn, dim=-1))
         output = torch.matmul(attn, v)
 

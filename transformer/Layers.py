@@ -1,11 +1,11 @@
 ''' Define the Layers '''
+
+
 import torch.nn as nn
 import torch
 from transformer.SubLayers import MultiHeadAttention, PositionwiseFeedForward
 
-
-__author__ = "Yu-Hsiang Huang"
-
+#Encoder Layer in Transformer
 
 class EncoderLayer(nn.Module):
     ''' Compose with two layers '''
@@ -21,6 +21,8 @@ class EncoderLayer(nn.Module):
         enc_output = self.pos_ffn(enc_output)
         return enc_output, enc_slf_attn
 
+
+#Decoder Layer in Transformer
 
 class DecoderLayer(nn.Module):
     ''' Compose with three layers '''
