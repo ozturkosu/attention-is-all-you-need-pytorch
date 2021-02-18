@@ -67,6 +67,8 @@ class MultiHeadAttention(nn.Module):
         if mask is not None:
             mask = mask.unsqueeze(1)   # For head axis broadcasting.
 
+        q = q.view(sz_b, -1, self.n_head, self.d_k)
+
         out, attn = self.attention(q, W_a, W_b, W_a2, W_b2, qt, v, d_k, mask=mask)
 
         # Transpose to move the head dimension back: b x lq x n x dv
@@ -118,6 +120,8 @@ class ScaledDotProductAttention(nn.Module):
 
         print(" Q Matrix size")
         print(q.size())
+
+        
 
         print("WA matrix size")
         print(W_A.size())
