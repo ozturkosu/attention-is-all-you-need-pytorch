@@ -241,7 +241,7 @@ def main():
     parser.add_argument('-lr_mul', type=float, default=2.0)
     parser.add_argument('-seed', type=int, default=None)
 
-    parser.add_argument('factorized_k' , type=int, default=32)
+    parser.add_argument('-factorized_k' , type=int, default=32)
     parser.add_argument('-dropout', type=float, default=0.1)
     parser.add_argument('-embs_share_weight', action='store_true')
     parser.add_argument('-proj_share_weight', action='store_true')
