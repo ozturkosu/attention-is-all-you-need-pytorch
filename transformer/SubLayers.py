@@ -131,6 +131,9 @@ class ScaledDotProductAttention(nn.Module):
         print(" Q Matrix size")
         print(q.size())
 
+        print(" V Matrix size")
+        print(v.size())
+
         print("WA matrix size")
         print(W_A.size())
 
