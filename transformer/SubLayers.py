@@ -161,6 +161,9 @@ class ScaledDotProductAttention(nn.Module):
         print("qt Matrix size")
         print(qt.size())
 
+        print("V Matrix size")
+        print(v.size())
+
         #k is batch size b is #heads
         # Score attention matrix
         attn = torch.einsum('kabj,kbjm->kbam' , [IABBtAt, qt])
