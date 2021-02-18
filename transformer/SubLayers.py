@@ -9,7 +9,7 @@ class MultiHeadAttention(nn.Module):
     ''' Multi-Head Attention module '''
 
     def __init__(self, n_head, d_model, d_k, d_v, factorized_k, dropout=0.1):
-        super().__init__():q
+        super().__init__()
 
         self.n_head = n_head
         self.d_k = d_k
