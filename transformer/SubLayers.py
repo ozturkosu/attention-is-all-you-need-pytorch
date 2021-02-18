@@ -194,7 +194,7 @@ class ScaledDotProductAttention(nn.Module):
         #attn = torch.matmul(q / self.temperature, k.transpose(2, 3))
 
         if mask is not None:
-            mask = mask.unsqueeze(1)
+            #mask = mask.unsqueeze(1)
             attn = attn.masked_fill(mask == 0, -1e9)
 
         # attn here is attention matrix
