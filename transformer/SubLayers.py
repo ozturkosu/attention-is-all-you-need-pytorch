@@ -52,8 +52,8 @@ class MultiHeadAttention(nn.Module):
         W_a = self.W_A.view(self.n_head, self.d_k,-1)
         W_b = self.W_A.view(self.n_head, -1, self.d_k)
 
-        W_a2 = self.W_A2.view(self.n_head, self.d_k,-1)
-        W_b2 = self.W_A2.view(self.n_head, -1, self.d_k)
+        W_a2 = self.W_A2.view(self.n_head, -1 , self.d_k,)
+        W_b2 = self.W_A2.view(self.n_head, self.d_k , -1)
 
 
 
