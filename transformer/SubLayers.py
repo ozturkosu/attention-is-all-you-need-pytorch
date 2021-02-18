@@ -185,6 +185,9 @@ class ScaledDotProductAttention(nn.Module):
         # Score attention matrix
         attn = torch.einsum('kabj,kbjm->kbam' , [IABBtAt, qt])
 
+        print("Atten Matrix size")
+        print(attn.size())
+
         #attn = torch.matmul(q / self.temperature, k.transpose(2, 3))
 
         if mask is not None:
