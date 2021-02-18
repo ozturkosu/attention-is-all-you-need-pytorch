@@ -87,7 +87,7 @@ class Decoder(nn.Module):
 
     def __init__(
             self, n_trg_vocab, d_word_vec, n_layers, n_head, d_k, d_v,
-            d_model, d_inner, pad_idx, n_position=200, factorized_k ,dropout=0.1, scale_emb=False):
+            d_model, d_inner, pad_idx, n_position=200, factorized_k=32 ,dropout=0.1, scale_emb=False):
 
         super().__init__()
 
