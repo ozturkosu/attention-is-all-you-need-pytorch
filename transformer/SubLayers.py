@@ -127,10 +127,10 @@ class ScaledDotProductAttention(nn.Module):
         print(W_A.size())
 
         #Calculate I * A
-        IA = torch.einsum('kabc,bcj->kabj', [q, W_A] )
+        IA = torch.einsum('kabc,bcd->kabd', [q, W_A] )
 
-        #print("IA Matrix size")
-        #print(IA.size())
+        print("IA Matrix size")
+        print(IA.size())
 
         #Calculate IA * B
         IAB = torch.einsum('kabj,bji->kabi', [IA, W_B] )
