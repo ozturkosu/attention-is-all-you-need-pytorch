@@ -149,6 +149,9 @@ class ScaledDotProductAttention(nn.Module):
         print("IABBt Matrix size")
         print(IABBt.size())
 
+        print("W_At Matrix size")
+        print(W_At.size())
+
         #Calculate IABBt * At
         IABBtAt = torch.einsum('kabm,bmj->kabj' , [IABBt , W_At])
 
