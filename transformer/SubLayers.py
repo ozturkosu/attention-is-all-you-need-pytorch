@@ -43,9 +43,13 @@ class MultiHeadAttention(nn.Module):
 
         print("len k")
         print(len_k)
+        print("d_k")
+        print(d_k)
 
         print("len_v")
         print(len_v)
+        print("d_v")
+        print(d_v)
 
         residual = q
 
