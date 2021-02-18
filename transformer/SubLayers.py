@@ -195,6 +195,7 @@ class ScaledDotProductAttention(nn.Module):
         attn = torch.div(attn,self.temperature )
 
         if mask is not None:
+            mask = mask.unsqueeze(1)
             attn = attn.masked_fill(mask == 0, -1e9)
 
         print("Atten Matrix size After MAsk")
