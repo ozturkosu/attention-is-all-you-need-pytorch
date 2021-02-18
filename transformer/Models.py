@@ -48,7 +48,7 @@ class Encoder(nn.Module):
 
     def __init__(
             self, n_src_vocab, d_word_vec, n_layers, n_head, d_k, d_v,
-            d_model, d_inner, pad_idx, dropout=0.1, n_position=200, scale_emb=False):
+            d_model, d_inner, pad_idx, factorized_k ,dropout=0.1, n_position=200, scale_emb=False):
 
         super().__init__()
 
@@ -56,7 +56,7 @@ class Encoder(nn.Module):
         self.position_enc = PositionalEncoding(d_word_vec, n_position=n_position)
         self.dropout = nn.Dropout(p=dropout)
         self.layer_stack = nn.ModuleList([
-            EncoderLayer(d_model, d_inner, n_head, d_k, d_v, dropout=dropout)
+            EncoderLayer(d_model, d_inner, n_head, d_k, d_v, factorized_k ,dropout=dropout)
             for _ in range(n_layers)])
         self.layer_norm = nn.LayerNorm(d_model, eps=1e-6)
         self.scale_emb = scale_emb
@@ -87,7 +87,7 @@ class Decoder(nn.Module):
 
     def __init__(
             self, n_trg_vocab, d_word_vec, n_layers, n_head, d_k, d_v,
-            d_model, d_inner, pad_idx, n_position=200, dropout=0.1, scale_emb=False):
+            d_model, d_inner, pad_idx, n_position=200, factorized_k ,dropout=0.1, scale_emb=False):
 
         super().__init__()
 
@@ -95,7 +95,7 @@ class Decoder(nn.Module):
         self.position_enc = PositionalEncoding(d_word_vec, n_position=n_position)
         self.dropout = nn.Dropout(p=dropout)
         self.layer_stack = nn.ModuleList([
-            DecoderLayer(d_model, d_inner, n_head, d_k, d_v, dropout=dropout)
+            DecoderLayer(d_model, d_inner, n_head, d_k, d_v, factorized_k ,dropout=dropout)
             for _ in range(n_layers)])
         self.layer_norm = nn.LayerNorm(d_model, eps=1e-6)
         self.scale_emb = scale_emb
@@ -129,7 +129,7 @@ class Transformer(nn.Module):
     def __init__(
             self, n_src_vocab, n_trg_vocab, src_pad_idx, trg_pad_idx,
             d_word_vec=512, d_model=512, d_inner=2048,
-            n_layers=6, n_head=8, d_k=64, d_v=64, dropout=0.1, n_position=200,
+            n_layers=6, n_head=8, d_k=64, d_v=64, factorized_k ,dropout=0.1, n_position=200,
             trg_emb_prj_weight_sharing=True, emb_src_trg_weight_sharing=True,
             scale_emb_or_prj='prj'):
 
@@ -157,13 +157,13 @@ class Transformer(nn.Module):
             n_src_vocab=n_src_vocab, n_position=n_position,
             d_word_vec=d_word_vec, d_model=d_model, d_inner=d_inner,
             n_layers=n_layers, n_head=n_head, d_k=d_k, d_v=d_v,
-            pad_idx=src_pad_idx, dropout=dropout, scale_emb=scale_emb)
+            pad_idx=src_pad_idx, factorized_k=factorized_k, dropout=dropout, scale_emb=scale_emb)
 
         self.decoder = Decoder(
             n_trg_vocab=n_trg_vocab, n_position=n_position,
             d_word_vec=d_word_vec, d_model=d_model, d_inner=d_inner,
             n_layers=n_layers, n_head=n_head, d_k=d_k, d_v=d_v,
-            pad_idx=trg_pad_idx, dropout=dropout, scale_emb=scale_emb)
+            pad_idx=trg_pad_idx, factorized_k=factorized_k ,dropout=dropout, scale_emb=scale_emb)
 
         self.trg_word_prj = nn.Linear(d_model, n_trg_vocab, bias=False)
 
