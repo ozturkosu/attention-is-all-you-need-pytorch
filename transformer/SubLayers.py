@@ -190,6 +190,7 @@ class ScaledDotProductAttention(nn.Module):
         print("Atten Matrix size")
         print(attn.size())
 
+
         #attn = torch.matmul(q / self.temperature, k.transpose(2, 3))
 
         if mask is not None:
@@ -199,5 +200,8 @@ class ScaledDotProductAttention(nn.Module):
         
         attn = self.dropout(F.softmax(attn, dim=-1))
         output = torch.matmul(attn, v)
+
+        print("Output Matrix")
+        print(output.size())
 
         return output, attn
