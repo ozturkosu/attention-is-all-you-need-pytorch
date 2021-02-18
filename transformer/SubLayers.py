@@ -62,7 +62,7 @@ class MultiHeadAttention(nn.Module):
         v = v.transpose(1, 2)
 
         qt = torch.einsum("abc->acb", [q])
-        qt = qt.view(bs, self.h, self.d_k, -1)
+        qt = qt.view(sz_b, self.n_head, self.d_k, -1)
 
         if mask is not None:
             mask = mask.unsqueeze(1)   # For head axis broadcasting.
