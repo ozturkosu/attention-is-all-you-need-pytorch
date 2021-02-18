@@ -41,10 +41,10 @@ class MultiHeadAttention(nn.Module):
         d_k, d_v, n_head = self.d_k, self.d_v, self.n_head
         sz_b, len_q, len_k, len_v = q.size(0), q.size(1), k.size(1), v.size(1)
 
-        print("len k")
-        print(len_k)
-        print("d_k")
-        print(d_k)
+        print("len q")
+        print(len_q)
+        print("d_q")
+        print(d_q)
 
         print("len_v")
         print(len_v)
