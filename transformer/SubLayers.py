@@ -114,7 +114,7 @@ class ScaledDotProductAttention(nn.Module):
         self.dropout = nn.Dropout(attn_dropout)
 
     #def forward(self, q, k, v, mask=None):
-    def forward(self, q, W_A, W_B, W_At, W_Bt, qt, v, d_k, mask=None )
+    def forward(self, q, W_A, W_B, W_At, W_Bt, qt, v, d_k, mask=None):
 
         #print("WA matrix size")
         #print(W_A.size())
