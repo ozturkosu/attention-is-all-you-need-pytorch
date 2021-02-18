@@ -116,8 +116,11 @@ class ScaledDotProductAttention(nn.Module):
     #def forward(self, q, k, v, mask=None):
     def forward(self, q, W_A, W_B, W_At, W_Bt, qt, v, d_k, mask=None):
 
-        #print("WA matrix size")
-        #print(W_A.size())
+        print(" Q Matrix size")
+        print(q.size())
+
+        print("WA matrix size")
+        print(W_A.size())
 
         #Calculate I * A
         IA = torch.einsum('kabc,bcj->kabj', [q, W_A] )
