@@ -158,8 +158,8 @@ class ScaledDotProductAttention(nn.Module):
         print("IABBtAt Matrix Size")
         print(IABBtAt.size())
 
-        #print("qt Matrix size")
-        #print(qt.size())
+        print("qt Matrix size")
+        print(qt.size())
 
         #k is batch size b is #heads
         # Score attention matrix
