@@ -41,6 +41,12 @@ class MultiHeadAttention(nn.Module):
         d_k, d_v, n_head = self.d_k, self.d_v, self.n_head
         sz_b, len_q, len_k, len_v = q.size(0), q.size(1), k.size(1), v.size(1)
 
+        print("len k")
+        print(len_k)
+
+        print("len_v")
+        print(len_v)
+
         residual = q
 
         # Pass through the pre-attention projection: b x lq x (n*dv)
