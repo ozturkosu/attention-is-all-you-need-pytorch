@@ -197,6 +197,9 @@ class ScaledDotProductAttention(nn.Module):
             #mask = mask.unsqueeze(1)
             attn = attn.masked_fill(mask == 0, -1e9)
 
+        print("Atten Matrix size After MAsk")
+        print(attn.size())
+
         # attn here is attention matrix
         
         attn = self.dropout(F.softmax(attn, dim=-1))
