@@ -43,8 +43,8 @@ class MultiHeadAttention(nn.Module):
 
         print("len q")
         print(len_q)
-        print("d_q")
-        print(d_q)
+        print("d_k")
+        print(d_k)
 
         print("len_v")
         print(len_v)
