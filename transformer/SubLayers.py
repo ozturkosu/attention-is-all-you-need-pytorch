@@ -65,10 +65,10 @@ class MultiHeadAttention(nn.Module):
         #q = self.w_qs(q).view(sz_b, len_q, n_head, d_k)
         #k = self.w_ks(k).view(sz_b, len_k, n_head, d_k)
 
-        #v = self.w_vs(v).view(sz_b, len_v, n_head, d_v)
+        v = self.w_vs(v).view(sz_b, len_v, n_head, d_v)
         #v = self.w_vs(q).view(sz_b, len_q, n_head, d_v)
 
-        v = torch.matmul(q, self.W_V)
+        #v = torch.matmul(q, self.W_V)
 
         print("Size of V in forward")
         print(v.size())
