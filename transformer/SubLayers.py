@@ -51,11 +51,8 @@ class MultiHeadAttention(nn.Module):
 
         #q = self.w_qs(q).view(sz_b, len_q, n_head, d_k)
         #k = self.w_ks(k).view(sz_b, len_k, n_head, d_k)
-
         v = self.w_vs(v).view(sz_b, len_v, n_head, d_v)
        
-        #print("Size of V in forward")
-        #print(v.size())
 
         W_a = self.W_A.view(self.n_head, self.d_k,-1)
         W_b = self.W_A.view(self.n_head, -1, self.d_k)
@@ -78,7 +75,7 @@ class MultiHeadAttention(nn.Module):
 
         q = q.view(sz_b, -1, self.n_head, self.d_k)
         v = v.view(sz_b, -1, self.n_head, self.d_k)
-        #out, attn = self.attention(q, W_a, W_b, W_a2, W_b2, qt, v, d_k, mask=mask)
+        
         q, attn = self.attention(q, W_a, W_b, W_a2, W_b2, kt, v, d_k, mask=mask)
 
 
@@ -86,12 +83,8 @@ class MultiHeadAttention(nn.Module):
         # Combine the last two dimensions to concatenate all the heads together: b x lq x (n*dv)
 
         q = q.transpose(1, 2).contiguous().view(sz_b, len_q, -1)
-
-        #out = self.dropout(self.fc(out))
         q= self.dropout(self.fc(q))
-
         q += residual
-
         q = self.layer_norm(q)
 
         return q, attn
@@ -133,79 +126,33 @@ class ScaledDotProductAttention(nn.Module):
     #def forward(self, q, k, v, mask=None):
     def forward(self, q, W_A, W_B, W_At, W_Bt, qt, v, d_k, mask=None):
 
-        #print(" Q Matrix size")
-        #print(q.size())
-
-        #print(" V Matrix size")
-        #print(v.size())
-
-        #print("WA matrix size")
-        #print(W_A.size())
 
         #Calculate I * A
         IA = torch.einsum('kabc,bcd->kabd', [q, W_A] )
 
-        #print("IA Matrix size")
-        #print(IA.size())
-
-        #print("WB matrix size")
-        #print(W_B.size())
-
-
         #Calculate IA * B
         IAB = torch.einsum('kabj,bji->kabi', [IA, W_B] )
-
-        #print("IAB Matrix size")
-        #print(IAB.size())
-
-        #print("W_Bt Matrix size")
-        #print(W_Bt.size())
 
         #Calculate IAB*Bt
         IABBt = torch.einsum('kabi,bim->kabm', [IAB, W_Bt])
 
-        #print("IABBt Matrix size")
-        #print(IABBt.size())
-
-        #print("W_At Matrix size")
-        #print(W_At.size())
-
         #Calculate IABBt * At
         IABBtAt = torch.einsum('kabm,bmj->kabj' , [IABBt , W_At])
 
-        #print("IABBtAt Matrix Size")
-        #print(IABBtAt.size())
-
-        #print("qt Matrix size")
-        #print(qt.size())
-
-        #print("V Matrix size")
-        #print(v.size())
-
-        #k is batch size b is #heads
+        #k is batch size b is NUM of heads
         # Score attention matrix
         attn = torch.einsum('kabj,kbjm->kbam' , [IABBtAt, qt])
-
-        #print("Atten Matrix size")
-        #print(attn.size())
-
 
         #attn = torch.matmul(q / self.temperature, k.transpose(2, 3))
         attn = torch.div(attn, self.temperature )
 
-
         if mask is not None:
             attn = attn.masked_fill(mask == 0, -1e9)
 
-       
-        # attn here is attention matrix
-        
+        # attn here is attention matrix        
         attn = self.dropout(F.softmax(attn, dim=-1))
 
         #output = torch.matmul(attn, v)
         output = torch.einsum('kbjm,kmbn->kbjn', [attn, v])
-
-        #print("Output Matrix")
-        #print(output.size())
 
         return output, attn
