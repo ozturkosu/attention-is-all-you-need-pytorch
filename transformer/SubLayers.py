@@ -202,8 +202,8 @@ class ScaledDotProductAttention(nn.Module):
         
         attn = self.dropout(F.softmax(attn, dim=-1))
 
-        output = torch.matmul(attn, v)
-        #output = torch.einsum('kbjm,kmbn->kbjn', [attn, v])
+        #output = torch.matmul(attn, v)
+        output = torch.einsum('kbjm,kmbn->kbjn', [attn, v])
 
         #print("Output Matrix")
         #print(output.size())
