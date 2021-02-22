@@ -85,8 +85,13 @@ class MultiHeadAttention(nn.Module):
         #q, k, v = q.transpose(1, 2), k.transpose(1, 2), v.transpose(1, 2)
         #v = v.transpose(1, 2)
 
-        qt = torch.einsum("abc->acb", [q])
-        qt = qt.view(sz_b, self.n_head, self.d_k, -1)
+        #k^T
+        #qt = torch.einsum("abc->acb", [q])
+        #qt = qt.view(sz_b, self.n_head, self.d_k, -1)
+
+        kt  = torch.einsum("abc->acb", [k])
+        kt = kt.view(sz_b, self.n_head, self.d_k, -1)
+
 
         if mask is not None:
             mask = mask.unsqueeze(1)   # For head axis broadcasting.
@@ -94,7 +99,7 @@ class MultiHeadAttention(nn.Module):
         q = q.view(sz_b, -1, self.n_head, self.d_k)
         v = v.view(sz_b, -1, self.n_head, self.d_k)
         #out, attn = self.attention(q, W_a, W_b, W_a2, W_b2, qt, v, d_k, mask=mask)
-        q, attn = self.attention(q, W_a, W_b, W_a2, W_b2, qt, v, d_k, mask=mask)
+        q, attn = self.attention(q, W_a, W_b, W_a2, W_b2, kt, v, d_k, mask=mask)
 
 
         # Transpose to move the head dimension back: b x lq x n x dv
@@ -217,10 +222,10 @@ class ScaledDotProductAttention(nn.Module):
         print("Size of Mask")
         print(mask.size())
 
-        print("Unsquuezed Mask")
+        #print("Unsquuezed Mask")
 
-        unmask=mask.unsqueeze(1)
-        print(unmask.size())
+        #unmask=mask.unsqueeze(1)
+        #print(unmask.size())
 
         if mask is not None:
             attn = attn.masked_fill(mask == 0, -1e9)
