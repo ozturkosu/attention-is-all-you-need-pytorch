@@ -17,7 +17,9 @@ class MultiHeadAttention(nn.Module):
 
         #self.w_qs = nn.Linear(d_model, n_head * d_k, bias=False)
         #self.w_ks = nn.Linear(d_model, n_head * d_k, bias=False)
-        self.w_vs = nn.Linear(d_model, n_head * d_v, bias=False)
+        #self.w_vs = nn.Linear(d_model, n_head * d_v, bias=False)
+
+        self.W_V = nn.Parameter(torch.rand(d_model,d_model), requires_grad=True)
 
         # Factorized Weight Matrix for Q 
         self.W_A = nn.Parameter(torch.rand(d_model, factorized_k), requires_grad=True)
@@ -63,9 +65,10 @@ class MultiHeadAttention(nn.Module):
         #q = self.w_qs(q).view(sz_b, len_q, n_head, d_k)
         #k = self.w_ks(k).view(sz_b, len_k, n_head, d_k)
 
-        v = self.w_vs(q).view(sz_b, len_v, n_head, d_v)
-
+        #v = self.w_vs(v).view(sz_b, len_v, n_head, d_v)
         #v = self.w_vs(q).view(sz_b, len_q, n_head, d_v)
+
+        v = torch.matmul(q, self.W_V)
 
         W_a = self.W_A.view(self.n_head, self.d_k,-1)
         W_b = self.W_A.view(self.n_head, -1, self.d_k)
