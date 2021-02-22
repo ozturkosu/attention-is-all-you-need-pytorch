@@ -217,8 +217,13 @@ class ScaledDotProductAttention(nn.Module):
         print("Size of Mask")
         print(mask.size())
 
-        #if mask is not None:
-        #    attn = attn.masked_fill(mask == 0, -1e9)
+        print("Unsquuezed Mask")
+
+        unmask=mask.unsqueeze(1)
+        print(unmask.size)
+
+        if mask is not None:
+            attn = attn.masked_fill(mask == 0, -1e9)
 
         print("Atten Matrix size After MAsk")
         print(attn.size())
