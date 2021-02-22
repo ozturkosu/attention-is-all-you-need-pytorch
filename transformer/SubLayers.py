@@ -220,7 +220,7 @@ class ScaledDotProductAttention(nn.Module):
         print("Unsquuezed Mask")
 
         unmask=mask.unsqueeze(1)
-        print(unmask.size)
+        print(unmask.size())
 
         if mask is not None:
             attn = attn.masked_fill(mask == 0, -1e9)
