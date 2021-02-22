@@ -83,7 +83,7 @@ class MultiHeadAttention(nn.Module):
 
         # Transpose for attention dot product: b x n x lq x dv
         #q, k, v = q.transpose(1, 2), k.transpose(1, 2), v.transpose(1, 2)
-        v = v.transpose(1, 2)
+        #v = v.transpose(1, 2)
 
         qt = torch.einsum("abc->acb", [q])
         qt = qt.view(sz_b, self.n_head, self.d_k, -1)
