@@ -84,14 +84,14 @@ class MultiHeadAttention(nn.Module):
             mask = mask.unsqueeze(1)   # For head axis broadcasting.
 
         #out, attn = self.attention(q, W_a, W_b, W_a2, W_b2, qt, v, d_k, mask=mask)
-        q=out, attn = self.attention(q, W_a, W_b, W_a2, W_b2, qt, v, d_k, mask=mask)
+        q, attn = self.attention(q, W_a, W_b, W_a2, W_b2, qt, v, d_k, mask=mask)
 
 
         # Transpose to move the head dimension back: b x lq x n x dv
         # Combine the last two dimensions to concatenate all the heads together: b x lq x (n*dv)
 
         #out = out.transpose(1, 2).contiguous().view(sz_b, len_q, -1)
-        q = out.transpose(1, 2).contiguous().view(sz_b, len_q, -1)
+        q = q.transpose(1, 2).contiguous().view(sz_b, len_q, -1)
 
         #out = out.transpose(1, 2).contiguous().view(sz_b, -1, len_q)
 
