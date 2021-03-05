@@ -29,6 +29,12 @@ class MultiHeadAttention(nn.Module):
         self.W_A2 = nn.Parameter(torch.rand(d_model, factorized_k), requires_grad=True)
         self.W_B2 = nn.Parameter(torch.rand(factorized_k, d_model), requires_grad=True)
 
+
+        # Factorized Weight Matrix for V ; W_V = W_A * W_B 
+        self.W_A3 = nn.Parameter(torch.rand(d_model, factorized_k), requires_grad=True)
+        self.W_B3 = nn.Parameter(torch.rand(factorized_k, d_model), requires_grad=True)
+
+
         
         self.fc = nn.Linear(n_head * d_v, d_model, bias=False)
 
@@ -51,7 +57,9 @@ class MultiHeadAttention(nn.Module):
 
         #q = self.w_qs(q).view(sz_b, len_q, n_head, d_k)
         #k = self.w_ks(k).view(sz_b, len_k, n_head, d_k)
-        v = self.w_vs(v).view(sz_b, len_v, n_head, d_v)
+
+
+        #v = self.w_vs(v).view(sz_b, len_v, n_head, d_v)
        
 
         W_a = self.W_A.view(self.n_head, self.d_k,-1)
@@ -59,6 +67,11 @@ class MultiHeadAttention(nn.Module):
 
         W_a2 = self.W_A2.view(self.n_head, -1 , self.d_k,)
         W_b2 = self.W_A2.view(self.n_head, self.d_k , -1)
+
+        # For V factorization
+        W_av = self.W_A3.view(self.n_head, self.d_k,-1)
+        W_bv = self.W_A3.view(self.n_head, -1, self.d_k)
+
 
 
         # Transpose for attention dot product: b x n x lq x dv
@@ -76,7 +89,10 @@ class MultiHeadAttention(nn.Module):
         q = q.view(sz_b, -1, self.n_head, self.d_k)
         v = v.view(sz_b, -1, self.n_head, self.d_k)
         
-        q, attn = self.attention(q, W_a, W_b, W_a2, W_b2, kt, v, d_k, mask=mask)
+        #before v factorization 
+        #q, attn = self.attention(q, W_a, W_b, W_a2, W_b2, kt, v, d_k, mask=mask)
+
+        q, attn = self.attention(q, W_a, W_b, W_a2, W_b2, W_av, W_bv, kt, v, d_k, mask=mask)
 
 
         # Transpose to move the head dimension back: b x lq x n x dv
@@ -124,7 +140,7 @@ class ScaledDotProductAttention(nn.Module):
         self.dropout = nn.Dropout(attn_dropout)
 
     #def forward(self, q, k, v, mask=None):
-    def forward(self, q, W_A, W_B, W_At, W_Bt, qt, v, d_k, mask=None):
+    def forward(self, q, W_A, W_B, W_At, W_Bt, W_av, W_bv, qt, v, d_k, mask=None):
 
 
         #Calculate I * A
@@ -153,6 +169,13 @@ class ScaledDotProductAttention(nn.Module):
         attn = self.dropout(F.softmax(attn, dim=-1))
 
         #output = torch.matmul(attn, v)
-        output = torch.einsum('kbjm,kmbn->kbjn', [attn, v])
+        #output = torch.einsum('kbjm,kmbn->kbjn', [attn, v])
+
+        attnI = torch.einsum('kbjm,kmbn->kbjn', [attn, v]) 
+        attnIWa = torch.einsum('kbjm,bma->kbja', [attnI, W_av])
+
+        output = torch.einsum('kbja,bac->kbjc', [attnIWa, W_bv])
+
+
 
         return output, attn
