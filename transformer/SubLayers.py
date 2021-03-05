@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import math
+from opt_einsum import contract
 
 class MultiHeadAttention(nn.Module):
     ''' Multi-Head Attention module '''
@@ -39,7 +40,7 @@ class MultiHeadAttention(nn.Module):
         self.fc = nn.Linear(n_head * d_v, d_model, bias=False)
 
         #self.attention = ScaledDotProductAttention(temperature=d_k ** 0.5)
-        self.attention = ScaledDotProductAttention(math.sqrt(d_k))
+        self.attention = OptEinsumScaledDotProductAttention(math.sqrt(d_k))
 
         self.dropout = nn.Dropout(dropout)
         self.layer_norm = nn.LayerNorm(d_model, eps=1e-6)
@@ -212,6 +213,62 @@ class ScaledDotProductAttention(nn.Module):
         #k is batch size b is NUM of heads
         # Score attention matrix
         attn = torch.einsum('kabj,kbjm->kbam' , [IABBtAt, qt])
+
+        #attn = torch.matmul(q / self.temperature, k.transpose(2, 3))
+        attn = torch.div(attn, self.temperature )
+
+        if mask is not None:
+            attn = attn.masked_fill(mask == 0, -1e9)
+
+        # attn here is attention matrix        
+        attn = self.dropout(F.softmax(attn, dim=-1))
+
+        #output = torch.matmul(attn, v)
+        #output = torch.einsum('kbjm,kmbn->kbjn', [attn, v])
+
+        attnI = torch.einsum('kbjm,kmbn->kbjn', [attn, v]) 
+        attnIWa = torch.einsum('kbjm,bma->kbja', [attnI, W_av])
+
+        output = torch.einsum('kbja,bac->kbjc', [attnIWa, W_bv])
+
+
+
+        return output, attn
+
+
+class OptEinsumScaledDotProductAttention(nn.Module):
+    ''' Scaled Dot-Product Attention '''
+
+    #Temperature is d 
+
+    def __init__(self, temperature, attn_dropout=0.1):
+        super().__init__()
+        self.temperature = temperature
+        self.dropout = nn.Dropout(attn_dropout)
+
+    #def forward(self, q, k, v, mask=None):
+    def forward(self, q, W_A, W_B, W_At, W_Bt, W_av, W_bv, qt, v, d_k, mask=None):
+
+
+        #Calculate I * A
+        #IA = torch.einsum('kabc,bcd->kabd', [q, W_A] )
+
+        #Calculate IA * B
+        #IAB = torch.einsum('kabj,bji->kabi', [IA, W_B] )
+
+        #Calculate IAB*Bt
+        #IABBt = torch.einsum('kabi,bim->kabm', [IAB, W_Bt])
+
+        #Calculate IABBt * At
+        #IABBtAt = torch.einsum('kabm,bmj->kabj' , [IABBt , W_At])
+
+        #k is batch size b is NUM of heads
+        # Score attention matrix
+        #attn = torch.einsum('kabj,kbjm->kbam' , [IABBtAt, qt])
+
+
+        attn= contract('kabc,bcd,bdi,bim,bmj,bjn->kban', q, W_A, W_B, W_Bt, W_At, qt)
+
 
         #attn = torch.matmul(q / self.temperature, k.transpose(2, 3))
         attn = torch.div(attn, self.temperature )
