@@ -120,7 +120,14 @@ class PositionwiseFeedForward(nn.Module):
 
         residual = x
 
+        print("X in PositionwiseFeedForward Before")
+        print(x.size())
+
         x = self.w_2(F.relu(self.w_1(x)))
+
+        print("X in PositionwiseFeedForward After")
+        print(x.size())
+
         x = self.dropout(x)
         x += residual
 
@@ -131,10 +138,25 @@ class PositionwiseFeedForward(nn.Module):
 class FactorizedPositionwiseFeedForward(nn.Module):
     ''' A two-feed-forward-layer module '''
 
-    def __init__(self, d_in, d_hid, dropout=0.1):
+    def __init__(self, d_in, d_hid, factorized_k, dropout=0.1):
         super().__init__()
-        self.w_1 = nn.Linear(d_in, d_hid) # position-wise
-        self.w_2 = nn.Linear(d_hid, d_in) # position-wise
+        #self.w_1 = nn.Linear(d_in, d_hid) # position-wise
+        #self.w_2 = nn.Linear(d_hid, d_in) # position-wise
+
+        # w_1 = w_1_A * w_1_B
+        # w_1_A = ( d_in, factorized_k)
+        # w_1_B = ( factorized_k, d_hid)
+
+        self.w_1_A = nn.Parameter(torch.rand( d_in, factorized_k), requires_grad=True)
+        self.w_1_B = nn.Parameter(torch.rand( factorized_k, d_hid), requires_grad=False)
+
+        # w_2 = w_2_A * w_2_B
+        # w_2_A = ( d_in, factorized_k)
+        # w_2_B = ( factorized_k, d_hid)
+
+        self.w_2_A = nn.Parameter(torch.rand( d_hid, factorized_k), requires_grad=True)
+        self.w_2_B = nn.Parameter(torch.rand( factorized_k, d_in), requires_grad=False)
+
         self.layer_norm = nn.LayerNorm(d_in, eps=1e-6)
         self.dropout = nn.Dropout(dropout)
 
@@ -142,7 +164,16 @@ class FactorizedPositionwiseFeedForward(nn.Module):
 
         residual = x
 
-        x = self.w_2(F.relu(self.w_1(x)))
+        #x = self.w_2(F.relu(self.w_1(x)))
+
+        XW_1A = torch.einsum('bmn,nk->bmk', [x, self.w_1_A])
+        XW_1AW_1B = torch.einsum('bmk, kh->bmh' , [ XW_1A, self.w_1_B])
+
+        x = F.relu(XW_1AW_1B)
+
+        XW_2A = torch.einsum('bmh, hk->bmk' , [x , self.w_2_A])
+        x = torch.einsum('bmk, ki->bmi' , [ XW_2A, self.w_2_B])
+
         x = self.dropout(x)
         x += residual
 

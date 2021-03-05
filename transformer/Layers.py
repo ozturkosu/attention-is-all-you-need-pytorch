@@ -3,7 +3,7 @@
 
 import torch.nn as nn
 import torch
-from transformer.SubLayers import MultiHeadAttention, PositionwiseFeedForward
+from transformer.SubLayers import MultiHeadAttention, PositionwiseFeedForward, FactorizedPositionwiseFeedForward
 
 #Encoder Layer in Transformer
 
@@ -13,7 +13,8 @@ class EncoderLayer(nn.Module):
     def __init__(self, d_model, d_inner, n_head, d_k, d_v, factorized_k, dropout=0.1):
         super(EncoderLayer, self).__init__()
         self.slf_attn = MultiHeadAttention(n_head, d_model, d_k, d_v, factorized_k ,dropout=dropout)
-        self.pos_ffn = PositionwiseFeedForward(d_model, d_inner, dropout=dropout)
+        #self.pos_ffn = PositionwiseFeedForward(d_model, d_inner, dropout=dropout)
+        self.pos_ffn = FactorizedPositionwiseFeedForward(d_model, d_inner, factorized_k, dropout=dropout)
 
     def forward(self, enc_input, slf_attn_mask=None):
         enc_output, enc_slf_attn = self.slf_attn(
@@ -31,7 +32,8 @@ class DecoderLayer(nn.Module):
         super(DecoderLayer, self).__init__()
         self.slf_attn = MultiHeadAttention(n_head, d_model, d_k, d_v, factorized_k ,dropout=dropout)
         self.enc_attn = MultiHeadAttention(n_head, d_model, d_k, d_v, factorized_k ,dropout=dropout)
-        self.pos_ffn = PositionwiseFeedForward(d_model, d_inner, dropout=dropout)
+        #self.pos_ffn = PositionwiseFeedForward(d_model, d_inner, dropout=dropout)
+        self.pos_ffn = FactorizedPositionwiseFeedForward(d_model, d_inner,factorized_k, dropout=dropout)
 
     def forward(
             self, dec_input, enc_output,
