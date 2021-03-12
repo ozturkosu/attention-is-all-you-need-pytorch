@@ -267,7 +267,7 @@ class OptEinsumScaledDotProductAttention(nn.Module):
         #attn = torch.einsum('kabj,kbjm->kbam' , [IABBtAt, qt])
 
 
-        attn= contract('kabc,bcd,bdi,bim,bmj,bjn->kban', q, W_A, W_B, W_Bt, W_At, qt)
+        attn = contract('kabc,bcd,bdi,bim,bmj,kbjn->kban', q, W_A, W_B, W_Bt, W_At, qt)
 
 
         #attn = torch.matmul(q / self.temperature, k.transpose(2, 3))
