@@ -167,13 +167,17 @@ class FactorizedPositionwiseFeedForward(nn.Module):
 
         #x = self.w_2(F.relu(self.w_1(x)))
 
-        XW_1A = torch.einsum('bmn,nk->bmk', [x, self.w_1_A])
-        XW_1AW_1B = torch.einsum('bmk, kh->bmh' , [ XW_1A, self.w_1_B])
+        #XW_1A = torch.einsum('bmn,nk->bmk', [x, self.w_1_A])
+        #XW_1AW_1B = torch.einsum('bmk, kh->bmh' , [ XW_1A, self.w_1_B])
+
+        XW_1AW_1B = contract('bmn,nk,kh->bmh', x, self.w_1_A, self.w_1_B)
 
         x = F.relu(XW_1AW_1B)
 
-        XW_2A = torch.einsum('bmh, hk->bmk' , [x , self.w_2_A])
-        x = torch.einsum('bmk, ki->bmi' , [ XW_2A, self.w_2_B])
+        #XW_2A = torch.einsum('bmh, hk->bmk' , [x , self.w_2_A])
+        #x = torch.einsum('bmk, ki->bmi' , [ XW_2A, self.w_2_B])
+
+        x = contract('bmh,hk,ki->bmi', x, self.w_2_A, self.w_2_B)
 
         x = self.dropout(x)
         x += residual
@@ -282,11 +286,14 @@ class OptEinsumScaledDotProductAttention(nn.Module):
         #output = torch.matmul(attn, v)
         #output = torch.einsum('kbjm,kmbn->kbjn', [attn, v])
 
-        attnI = torch.einsum('kbjm,kmbn->kbjn', [attn, v]) 
-        attnIWa = torch.einsum('kbjm,bma->kbja', [attnI, W_av])
 
-        output = torch.einsum('kbja,bac->kbjc', [attnIWa, W_bv])
+        #Opt Einsum For all 
+        #attnI = torch.einsum('kbjm,kmbn->kbjn', [attn, v]) 
+        #attnIWa = torch.einsum('kbjm,bma->kbja', [attnI, W_av])
+        #output = torch.einsum('kbja,bac->kbjc', [attnIWa, W_bv])
 
+
+        output = contract('kbjm,kmbn,bma,bac->kbjc', attn, v, W_av, W_bv)
 
 
         return output, attn
