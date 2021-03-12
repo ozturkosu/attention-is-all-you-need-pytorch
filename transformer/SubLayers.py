@@ -293,7 +293,7 @@ class OptEinsumScaledDotProductAttention(nn.Module):
         #output = torch.einsum('kbja,bac->kbjc', [attnIWa, W_bv])
 
 
-        output = contract('kbjm,kmbn,bma,bac->kbjc', attn, v, W_av, W_bv)
+        output = contract('kbjm,kmbn,bna,bac->kbjc', attn, v, W_av, W_bv)
 
 
         return output, attn
