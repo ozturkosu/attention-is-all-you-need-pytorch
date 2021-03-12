@@ -149,8 +149,8 @@ def train(model, training_data, validation_data, optimizer, device, opt):
         log_train_file, log_valid_file))
 
     with open(log_train_file, 'w') as log_tf, open(log_valid_file, 'w') as log_vf:
-        log_tf.write('epoch,loss,ppl,accuracy\n')
-        log_vf.write('epoch,loss,ppl,accuracy\n')
+        log_tf.write('epoch,loss,ppl,accuracy,epochTime\n')
+        log_vf.write('epoch,loss,ppl,accuracy,epochTime\n')
 
     def print_performances(header, ppl, accu, start_time, lr, Num_parameters):
         print('  - {header:12} ppl: {ppl: 8.5f}, accuracy: {accu:3.3f} %, lr: {lr:8.5f}, '\
@@ -163,11 +163,14 @@ def train(model, training_data, validation_data, optimizer, device, opt):
     for epoch_i in range(opt.epoch):
         print('[ Epoch', epoch_i, ']')
 
+        #Train Time Start
         start = time.time()
         train_loss, train_accu = train_epoch(
             model, training_data, optimizer, opt, device, smoothing=opt.label_smoothing)
             
         train_ppl = math.exp(min(train_loss, 100))
+
+        endtrain = time.time()
 
         # Current learning rate
         lr = optimizer._optimizer.param_groups[0]['lr']
@@ -176,13 +179,16 @@ def train(model, training_data, validation_data, optimizer, device, opt):
         Num_parameters = count_parameters(model)
         print_performances('Training', train_ppl, train_accu, start, lr, Num_parameters)
 
-        start = time.time()
+        start2 = time.time()
         valid_loss, valid_accu = eval_epoch(model, validation_data, device, opt)
+
         valid_ppl = math.exp(min(valid_loss, 100))
+
+        endvalid = time.time()
 
         #Calculate Num op parameters of model
         Num_parameters = count_parameters(model)
-        print_performances('Validation', valid_ppl, valid_accu, start, lr, Num_parameters)
+        print_performances('Validation', valid_ppl, valid_accu, start2, lr, Num_parameters)
 
         valid_losses += [valid_loss]
 
@@ -198,12 +204,12 @@ def train(model, training_data, validation_data, optimizer, device, opt):
                 print('    - [Info] The checkpoint file has been updated.')
 
         with open(log_train_file, 'a') as log_tf, open(log_valid_file, 'a') as log_vf:
-            log_tf.write('{epoch},{loss: 8.5f},{ppl: 8.5f},{accu:3.3f}\n'.format(
+            log_tf.write('{epoch},{loss: 8.5f},{ppl: 8.5f},{accu:3.3f}, {elapse:3.3f}\n'.format(
                 epoch=epoch_i, loss=train_loss,
-                ppl=train_ppl, accu=100*train_accu))
-            log_vf.write('{epoch},{loss: 8.5f},{ppl: 8.5f},{accu:3.3f}\n'.format(
+                ppl=train_ppl, accu=100*train_accu, elapse=(endtrain-start)/60))
+            log_vf.write('{epoch},{loss: 8.5f},{ppl: 8.5f},{accu:3.3f}, {elapse:3.3f}\n'.format(
                 epoch=epoch_i, loss=valid_loss,
-                ppl=valid_ppl, accu=100*valid_accu))
+                ppl=valid_ppl, accu=100*valid_accu, elapse=(endvalid-start2/60)))
 
         if opt.use_tb:
             tb_writer.add_scalars('ppl', {'train': train_ppl, 'val': valid_ppl}, epoch_i)
