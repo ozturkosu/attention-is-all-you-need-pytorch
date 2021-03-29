@@ -160,14 +160,33 @@ def train(model, training_data, validation_data, optimizer, device, opt):
 
     #valid_accus = []
     valid_losses = []
-    for epoch_i in range(opt.epoch):
+
+    # Do 2 training in per epcoh
+    for epoch_i in range(opt.epoch/2):
+    #for epoch_i in range(opt.epoch):
         print('[ Epoch', epoch_i, ']')
 
         #Train Time Start
         start = time.time()
+
+
+        # Pruning from Peng's code
+        for epoch in range(2)
+            train_loss, train_accu = train_epoch(
+                model, training_data, optimizer, opt, device, smoothing=opt.label_smoothing)
+            
+        #Updates W After training and testing
+        W = []
+        layers = model.state_dict()
+
+        for k in layers.keys():
+        if k.find('weight') >= 0:
+            W.append(layers[k])  # new weights after training and testing
+
+
         train_loss, train_accu = train_epoch(
             model, training_data, optimizer, opt, device, smoothing=opt.label_smoothing)
-            
+
         train_ppl = math.exp(min(train_loss, 100))
 
         endtrain = time.time()
