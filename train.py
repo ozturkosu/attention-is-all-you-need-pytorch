@@ -160,9 +160,9 @@ def train(model, training_data, validation_data, optimizer, device, opt):
 
     #valid_accus = []
     valid_losses = []
-
+    newepoch= opt.epoch/2
     # Do 2 training in per epcoh
-    for epoch_i in range(opt.epoch/2):
+    for epoch_i in range(200):
     #for epoch_i in range(opt.epoch):
         print('[ Epoch', epoch_i, ']')
 
@@ -171,7 +171,8 @@ def train(model, training_data, validation_data, optimizer, device, opt):
 
 
         # Pruning from Peng's code
-        for epoch in range(2)
+        for epoch in range(2):
+            print(' [ Epoch inside ', epoch, ' ]')
             train_loss, train_accu = train_epoch(
                 model, training_data, optimizer, opt, device, smoothing=opt.label_smoothing)
             
@@ -179,9 +180,17 @@ def train(model, training_data, validation_data, optimizer, device, opt):
         W = []
         layers = model.state_dict()
 
+        print("Model's State_dict:")
+        for param_tensor in layers:
+            print(param_tensor, "\t", layers[param_tensor].size())
+
+
+
         for k in layers.keys():
-        if k.find('weight') >= 0:
-            W.append(layers[k])  # new weights after training and testing
+            if k.find('weight') >= 0:
+                W.append(layers[k])  # new weights after training and testing
+
+        #print(W)
 
 
         train_loss, train_accu = train_epoch(
